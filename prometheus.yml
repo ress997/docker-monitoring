@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    monitor: 'codelab-monitor'
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+  - job_name: 'grafana'
+    dns_sd_configs:
+      - names:
+        - 'grafana'
+        type: 'A'
+        port: 3000
+        refresh_interval: 10s
+  - job_name: 'scd30'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.100.4:8000']

@@ -1,0 +1,47 @@
+version: '3'
+services:
+  db:
+    restart: always
+    image: postgres:15-alpine
+    shm_size: 256mb
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+    environment:
+      POSTGRES_DATABASE: grafana
+      POSTGRES_USER: grafana
+      POSTGRES_PASSWORD: password
+
+  grafana:
+    restart: always
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - VIRTUAL_HOST=grafana.loc
+      - GF_SERVER_ROOT_URL=http://grafana.loc
+      - GF_DATABASE_NAME=grafana
+      - GF_DATABASE_USER=grafana
+      - GF_DATABASE_PASSWORD=password
+      - GF_DATABASE_TYPE=postgres
+      - GF_DATABASE_HOST=db:5432
+      - GF_DATABASE_SSL_MODE=disable
+      - GF_SERVER_ROUTER_LOGGING=true
+      - GF_LOG_CONSOLE_FORMAT=json
+      - GF_LOG_FILTERS=alerting.notifier:debug,alerting.notifier.slack:debug,auth:debug
+      - GF_AUTH_TOKEN_ROTATION_INTERVAL_MINUTES=2
+    volumes:
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+
+  prometheus:
+    restart: always
+    image: prom/prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    environment:
+      - VIRTUAL_HOST=prometheus.loc
+    ports:
+      - '9090:9090'
