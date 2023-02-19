@@ -8,6 +8,8 @@ services:
       - "5432:5432"
     healthcheck:
       test: ['CMD', 'pg_isready', '-U', 'postgres']
+    volumes:
+      - ./postgres14:/var/lib/postgresql/data
     environment:
       POSTGRES_DATABASE: grafana
       POSTGRES_USER: grafana
